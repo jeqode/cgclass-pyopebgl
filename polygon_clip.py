@@ -3,10 +3,13 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import sys, copy
 
+LEFT = 1
+RIGHT = 2
+TOP = 4
+BOTTOM = 8
 WIN_WIDTH = 400
 WIN_HEIGHT = WIN_WIDTH
 STEP = 2.0 / WIN_WIDTH
-
 class Point(object):
     def __init__(self, x, y):
         self.x = x
@@ -66,9 +69,10 @@ def kbfunc(key, x, y):
     direction = {100:"LEFT", 101:"UP", 102:"RIGHT", 103:"DOWN"}
     if key in direction:
         window.move(direction[key])
-    elif key == "\r":
-        pass
-    glutPostRedisplay()
+        glutPostRedisplay()
+    elif key == b'\r':
+        clipPolygon(points)
+        glutPostRedisplay()
 
 def drawPolygon(points):
     glPushMatrix()
@@ -91,15 +95,52 @@ def display():
     glVertex2f(0,-1)
     glEnd()
     glPopMatrix()
-    if draw: drawPolygon(points)
+    if points: drawPolygon(points)
     drawWindow(window)
     glutSwapBuffers()
 
-def clipPolygon(points):
-    pass
+def newPoint(p1, p2, mnMxPoint, axis):
+    nPoint = Point(0,0)
+    setattr(nPoint, axis, getattr(getattr(window, mnMxPoint), axis)) # nPoint.(x or y) = window.(minPoint or maxPoint).(x or y)
+    dx = p2.x - p1.x
+    dy = p2.y - p1.y
+    if dx == 0:
+        nPoint.x = p1.x
+    else:
+        m = dy / dx
+        b = p2.y - m * p2.x
+        if axis == "y":
+            nPoint.x = (p1.y - b) / m
+        else:
+            nPoint.y = m * p1.x + b
+    return nPoint
 
+def clipPolygon(points):
+    sides = [LEFT, RIGHT, TOP, BOTTOM]
+    for side in sides:
+        i = 0
+        n = len(points)
+        tmpPoints = []
+        while i < n:
+            s = points[i]
+            if i == n - 1:
+                p = points[0]
+            else:
+                p = points[i+1]
+            mnMxPoint = "maxPoint" if side & (TOP | RIGHT) else "minPoint"
+            axis = "x" if side & (LEFT | RIGHT) else "y"
+            if not p.isOutOf_On_Side(window, side):
+                if s.isOutOf_On_Side(window, side):
+                    tmpPoints.append(newPoint(s, p, mnMxPoint, axis))
+                tmpPoints.append(p)
+            else:
+                if not s.isOutOf_On_Side(window, side):
+                    tmpPoints.append(newPoint(p, s, mnMxPoint, axis))
+            i += 1
+        points.clear()
+        points.extend(tmpPoints)
+                
 """main"""
-draw = True
 window = Window.xy(-0.2, -0.2, 0.2, 0.2)
 points = []
 points.append(Point(-0.35, 0.35))
