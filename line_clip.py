@@ -103,7 +103,7 @@ def kbfunc(key, x, y):
     direction = {100:"LEFT", 101:"UP", 102:"RIGHT", 103:"DOWN"}
     if key in direction:
         window.move(direction[key])
-    elif key == "\r":
+    elif key == b"\r":
         clipLine()
     glutPostRedisplay()
 
@@ -132,25 +132,27 @@ def clipLine():
                 p1, p2, code1, code2 = p2, p1, code2, code1
             dx = p2.x - p1.x
             dy = p2.y - p1.y
-            m = dy / dx
-            b = p2.y - m * p2.x
             if code1 & LEFT:
                 p1.x = window.minPoint.x
-                p1.y = m * p1.x + b
             elif code1 & RIGHT:
                 p1.x = window.maxPoint.x
-                p1.y = m * p1.x + b
             elif code1 & TOP:
                 p1.y = window.maxPoint.y
-                p1.x = (p1.y - b) / m
             elif code1 & BOTTOM:
                 p1.y = window.minPoint.y
-                p1.x = (p1.y - b) / m
+            if dx != 0:
+                m = dy / dx
+                b = p2.y - m * p2.x
+                if code1 & (LEFT | RIGHT):
+                    p1.y = m * p1.x + b
+                else:
+                    p1.x = (p1.y - b) / m
 
 """main"""
 draw = True
 window = Window.xy(-0.2, -0.2, 0.2, 0.2)
-line = Line(Point(-1, -1), Point(1,1))
+#line = Line(Point(-1, -1), Point(1,1))
+line = Line(Point(-1, 0.5), Point(1,0.5))
 initial()
 glutKeyboardFunc(kbfunc)
 glutSpecialFunc(kbfunc)
