@@ -50,7 +50,7 @@ def initial ():
     glutInit(sys.argv)
     glutInitWindowSize(WIN_WIDTH,WIN_HEIGHT)
     glutInitWindowPosition(0, 0)
-    glutCreateWindow("Line Clip")
+    glutCreateWindow("Polygon clip function")
     glLineWidth(1)
     glClearColor(0.188,0.3137,0.361,1)
 
