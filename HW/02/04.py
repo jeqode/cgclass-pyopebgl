@@ -6,6 +6,7 @@ TITLE = b'CG: Homework #02-04 : Lighting'
 WIDTH, HEIGHT = 500, 500
 theta, view = 0, 0
 en_light = True
+shn = 4
 
 light = {
 	"pos": [4, 8, 10, 0],
@@ -18,7 +19,7 @@ mat = {
 	"dif": [0.0, 0.0, 0.6, 1],
 	"amb": [0.0, 0.0, 0.4, 1],
 	"spc": [1.0, 0.0, 1.0, 1],
-	"shn": 4
+	"shn": shn
 }
 
 def init():
@@ -46,7 +47,7 @@ def idle():
 	glutPostRedisplay()
 
 def kb(key, x, y):
-	global view, en_light
+	global view, en_light, shn
 	if key == b'\x1b':
 		sys.exit()
 	elif key == b'v':
@@ -56,6 +57,12 @@ def kb(key, x, y):
 			view += 1
 	elif key == b'l':
 		en_light = not en_light
+	elif key == b's':
+		shn += 1
+		print("Shininess : %d" % shn)
+	elif key == b'a':
+		shn -= 1
+		print("Shininess : %d" % (shn))
 	glutPostRedisplay()
 
 def setScene():
@@ -96,7 +103,7 @@ def display():
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat["dif"])
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mat["amb"])
 	glMaterialfv(GL_FRONT, GL_SPECULAR, mat["spc"])
-	glMaterialfv(GL_FRONT, GL_SHININESS, mat["shn"])
+	glMaterialfv(GL_FRONT, GL_SHININESS, shn)
 	glColor3ub(0, 0, 100)
 	glutSolidSphere(10, 80, 80)
 	glPopMatrix()

@@ -4,8 +4,10 @@ from OpenGL.GLUT import *
 from numpy import arccos, dot, cross, array, sqrt, pi
 TITLE = "CG: Homework #02-06 : Rotate sphere around cylinder"
 WIDTH, HEIGHT = 500, 500
-view, en_light, fill = True, True, True
-theta, eye_x = 0, 0
+view, en_light, fill, en_blend = True, True, True, True
+theta = 0
+eye_x, eye_y, eye_z = 0, 0, 20
+center_x, center_y, center_z = 0, 0, -10
 a, sph_loc, cyl_height, angle = 5, 0, 0, 0
 rot = None
 
@@ -51,7 +53,7 @@ def init():
 	glLightfv(GL_LIGHT0, GL_SPECULAR, light["spc"])
 
 def kb(key, x, y):
-	global view, en_light, eye_x, a, fill
+	global view, en_light, eye_x, eye_y, eye_z, a, fill, en_blend
 	if key == b'\x1b':
 		sys.exit()
 	elif key == b'v':
@@ -66,6 +68,16 @@ def kb(key, x, y):
 		a = int(input("New location (a, a, a) : "))
 	elif key == b'f':
 		fill = not fill
+	elif key == b'b':
+		en_blend = not en_blend
+	elif key == 100:
+		eye_x -= 1
+	elif key == 102:
+		eye_x += 1
+	elif key == 101:
+		eye_z -= 1
+	elif key == 103:
+		eye_z += 1
 	glutPostRedisplay()
 
 def idle():
@@ -86,13 +98,17 @@ def setScene():
 		glOrtho(-10, 10, -10, 10, 5, 40)
 	glMatrixMode(GL_MODELVIEW)
 	glLoadIdentity()
-	gluLookAt(eye_x, 0, 20, eye_x, 0, -1, 0, 1, 0)
+	gluLookAt(eye_x, eye_y, eye_z, eye_x, center_y, center_z, 0, 1, 0)
 	if en_light:
 		glEnable(GL_LIGHTING)
 		glEnable(GL_LIGHT0)
 	else:
 		glDisable(GL_LIGHT0)
 		glDisable(GL_LIGHTING)
+	if en_blend:
+		glEnable(GL_BLEND)
+	else:
+		glDisable(GL_BLEND)
 
 def drawGrid(a):
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, mat[2]["dif"])
@@ -171,6 +187,7 @@ def main():
 	init()
 	glutDisplayFunc(display)
 	glutKeyboardFunc(kb)
+	glutSpecialFunc(kb)
 	glutIdleFunc(idle)
 	glutMainLoop()
 
